@@ -4,15 +4,22 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Max
 
 from .models import User, Listing, Bid, Comment
 from .forms import AuctionListingForm
 
 def index(request):
     listings = Listing.objects.all().values()
+    high_bids = Bid.objects.aggregate(highestbid=Max('amount'))['highestbid']
+
+    if high_bids:
+        highest_bid = Bid.objects.filter(amount=high_bids).values().values_list("amount")[0][0]
+    else:
+        highest_bid = 0
     return render(request, "auctions/index.html", {
         "listings": listings,
+        "highest_bid": highest_bid
     })
 
 
@@ -114,20 +121,38 @@ def unwatch(request, id):
 
 def listing(request, id):
     current = Listing.objects.get(pk=id)
-    bid = sorted(get_list_or_404(Bid, auction=current))
+    bid = get_list_or_404(Bid, auction=current)
+    #high_bids = Bid.objects.aggregate(highestbid=Max('amount'))['highestbid']
+    # highest_bid = Bid.objects.filter(amount=high_bids).values().values_list("amount")
+    user = request.user
+    """ 
+    print(highest_bid)
+    print(user)
+    print(id) """
     print(bid)
     #comments = Comment.objects.filter(auction=current)
     return render(request, "auctions/listing.html", {
         "listing": current,
-        "bid": bid[len(bid) - 1]
+        "bid": bid[len(bid) - 1],
+        "highest_bid": bid[len(bid) - 1],
+        "user": user
     })
 
 def place_bid(request, id):
     if request.method == "POST":
         current = Listing.objects.get(pk=id)
-        bidamount = int(request.POST['bid'])
-        bidinput = Bid(amount = bidamount, user = request.user, auction = current)
-        bidinput.save()
-        return render(request, "auctions/result.html", {
-            "message": "Succes! Bid has been placed!",
-        })
+        bidamount = request.POST['bidsss']
+        high_bids = Bid.objects.aggregate(highestbid=Max('amount'),)['highestbid']
+        highest_bid = Bid.objects.filter(amount=high_bids).values().values_list("amount")
+        print(highest_bid[0][0])
+        print(bidamount)
+        if float(bidamount) > float(highest_bid[0][0]):
+            bidinput = Bid(amount = bidamount, user = request.user, auction = current)
+            bidinput.save()
+            return render(request, "auctions/result.html", {
+                "message": "Succes! Bid has been placed!",
+            })
+        else:
+           return render(request, "auctions/result.html", {
+                "message": "Failed! Bid is too low!",
+            })

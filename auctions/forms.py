@@ -22,6 +22,7 @@ class AuctionListingForm(forms.Form):
         )
     )
 
+
     starting_bid = forms.DecimalField(
         label='Starting Bid',
         required=True,

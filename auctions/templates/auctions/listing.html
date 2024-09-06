@@ -11,7 +11,7 @@
                     </h3>
                     </div>
                     <img class="rounded" src="{{ listing.image_url }}" alt="{{ listing.title }}"
-                    style="width: 500px; height: 500px; object-fit: cover;">
+                    style="width: 500px; height: 500px; object-fit: contain;">
                     <div class="d-sm-flex justify-content-between my-4 pb-4 border-bottom">
          
                         <div class="media d-block d-sm-flex text-center text-sm-left">
@@ -22,7 +22,7 @@
                                 Description: </span>{{ listing.description }}
                                 </div>
                                 <div class="font-size-sm mb-1"><span class="text-muted mr-2">
-                                Author: </span>{{ listing.user }}
+                                Author: </span>{{ listing.owner }}
                                 </div>
                                 {% if listing.category %}
                                     <div class="font-size-sm mb-1"><span class="text-muted mr-2">
@@ -34,7 +34,7 @@
                                     </div>
                                 {% endif %}
                                 {% if listing.starting_bid %}
-                                    <div class="font-size-sm text-success mb-1"><span class="text-muted mr-2">Price: </span>${{ listing.starting_bid }}</div>
+                                    <div class="font-size-sm text-success mb-1"><span class="text-muted mr-2">Price: </span>${{ highest_bid }}</div>
                                 {% else %}
                                     <div class="font-size-sm text-danger mb-1"><span class="text-muted mr-2">Price: </span>Not specified</div>
                                 {% endif %}
@@ -43,18 +43,32 @@
                                 {% else %}
                                     <div class="font-size-lg text-danger mb-1"><span class="text-muted mr-2">Status: </span>Sold</div>
                                 {% endif %}
+                                <span class="text-danger">Highest bid: {{ highest_bid }} </span>    
+                                <br>
                                 <span class="text-muted">Created at: {{ listing.created_at }} </span>
                                 
+                                
                             </div>
+                            {% if listing.owner == user %}
+                                <div class="offset-1">
+                                    <label for="bidss" class="label">Bid:</label>
+                                    <form action="{% url 'place_bid' listing.id %}" class="input-group" method="post" id="bidss">
+                                        {% csrf_token %}
+                                        <span class="input-group-text">$</span>
+                                        <input class="form-control" aria-label="Amount" disabled type="number" name="bidsss" placeholder="Your own listing bud">
+                                        <button class="btn btn-primary" type="submit" id="bidbutton">Place Bid!</button>
+                                    </form>
+                                </div>
+                            {% else %}
                             <div class="offset-1">
                                 <label for="bidss" class="label">Bid:</label>
-                                <form action="{% url 'place_bid' bid.id %}" class="input-group" method="post" id="bidss">
+                                <form action="{% url 'place_bid' listing.id %}" class="input-group" method="post" id="bidss">
                                     {% csrf_token %}
                                     <span class="input-group-text">$</span>
-                                    <input class="form-control" aria-label="Amount" type="number" name="bid" placeholder="Minimum: {{ bid.amount }}">
+                                    <input class="form-control" aria-label="Amount" type="number" name="bidsss" placeholder="Minimum: {{ highest_bid }}">
                                     <button class="btn btn-primary" type="submit" id="bidbutton">Place Bid!</button>
                                 </form>
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     <!-- Item-->

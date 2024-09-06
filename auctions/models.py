@@ -18,9 +18,8 @@ class Listing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
     winner = models.CharField(max_length=100, blank=True, null=True)
-
     def __str__(self):
-        return f'{self.title} by {self.owner.username}'
+        return f'{self.title} by {self.owner}'
 
 
 
@@ -31,7 +30,7 @@ class Bid(models.Model):
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.amount} on {self.auction} by {self.user.username}'
+        return f'{self.amount} on {self.auction}'
 
 class Comment():
     pass
